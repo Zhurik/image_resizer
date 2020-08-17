@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            Главная
+        </title>
+    </head>
+    <body>
+        <h1>
+            Список изображений
+        </h1>
+        {% if images %}
+            {% for image in images %}
+                <a href="/images/{{ image.id }}/">{{ image.name }}</a><br>
+            {% endfor %}
+        {% else %}
+            <h2>
+                Нет доступных изображений
+            </h2>
+        {% endif %}
+        <br><a href="{% url 'add_new' %}">
+            Добавить изображение
+        </a>
+    </body>
+</html>
