@@ -63,32 +63,32 @@ def resize(request) -> HttpResponse:
         error_message = "Укажите хотя бы одно значение!"
 
     else:
-        # try:
-        new_width = int(request.POST["width"]) if request.POST["width"] else img.file.width
-        new_height = int(request.POST["height"]) if request.POST["height"] else img.file.height
+        try:
+            new_width = int(request.POST["width"]) if request.POST["width"] else img.file.width
+            new_height = int(request.POST["height"]) if request.POST["height"] else img.file.height
 
-        new_image = Image.open(img.file.path)
+            new_image = Image.open(img.file.path)
 
-        # Сжимаем картинку до нужных размеров
-        new_image.thumbnail((new_width, new_height))
+            # Сжимаем картинку до нужных размеров
+            new_image.thumbnail((new_width, new_height))
 
-        buffered = BytesIO()
+            buffered = BytesIO()
 
-        new_image.save(buffered, format="JPEG")
+            new_image.save(buffered, format="JPEG")
 
-        base64_image = base64.b64encode(buffered.getvalue())
+            base64_image = base64.b64encode(buffered.getvalue())
 
-        img = ResizableImagePretender(
-            new_image,
-            request.POST["image_id"],
-            base64_image.decode("ascii")
-        )
+            img = ResizableImagePretender(
+                new_image,
+                request.POST["image_id"],
+                base64_image.decode("ascii")
+            )
 
-        # except ValueError:
-        #     error_message = "Допустимы только целочисленные значения!"
+        except ValueError:
+            error_message = "Допустимы только целочисленные значения!"
 
-        # except:
-        #     error_message = "Ошибка на сервере! Приносим свои извинения!"
+        except:
+            error_message = "Ошибка на сервере! Приносим свои извинения!"
 
     return render(
         request,
