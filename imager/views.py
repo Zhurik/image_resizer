@@ -1,5 +1,6 @@
+import base64
+from io import BytesIO
 from PIL import Image
-import os
 
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
@@ -62,35 +63,32 @@ def resize(request) -> HttpResponse:
         error_message = "Укажите хотя бы одно значение!"
 
     else:
-        try:
-            new_width = int(request.POST["width"]) if request.POST["width"] else img.file.width
-            new_height = int(request.POST["height"]) if request.POST["height"] else img.file.height
+        # try:
+        new_width = int(request.POST["width"]) if request.POST["width"] else img.file.width
+        new_height = int(request.POST["height"]) if request.POST["height"] else img.file.height
 
-            new_image = Image.open(img.file.path)
-            new_image.thumbnail((new_width, new_height))
+        new_image = Image.open(img.file.path)
 
-            old_path, old_name = img.file.path.rsplit("/", 1)
+        # Сжимаем картинку до нужных размеров
+        new_image.thumbnail((new_width, new_height))
 
-            new_image_path = old_path + "/tmp/" + request.POST["csrfmiddlewaretoken"] + old_name
+        buffered = BytesIO()
 
-            new_image.save(new_image_path)
+        new_image.save(buffered, format="JPEG")
 
-            # Костыль
-            # Чтобы не очищать по расписанию, удаляем все картинки, которым больше одной минуты
-            # каждый раз, когда обрабатываем новую
-            os.system("find ./media/images/tmp/* -mmin +1 -delete 2> /dev/null")
+        base64_image = base64.b64encode(buffered.getvalue())
 
-            img = ResizableImagePretender(
-                new_image,
-                request.POST["image_id"],
-                request.POST["csrfmiddlewaretoken"] + old_name
-            )
+        img = ResizableImagePretender(
+            new_image,
+            request.POST["image_id"],
+            base64_image.decode("ascii")
+        )
 
-        except ValueError:
-            error_message = "Допустимы только целочисленные значения!"
+        # except ValueError:
+        #     error_message = "Допустимы только целочисленные значения!"
 
-        except:
-            error_message = "Ошибка на сервере! Приносим свои извинения!"
+        # except:
+        #     error_message = "Ошибка на сервере! Приносим свои извинения!"
 
     return render(
         request,

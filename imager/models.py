@@ -32,13 +32,11 @@ class ResizableImagePretender:
     измененные изображения
     """
 
-    MEDIA_PATH = "/media/images/tmp/"
-
-    def __init__(self, img: Image, img_id: int, img_name: str) -> None:
+    def __init__(self, img: Image, img_id: int, base64_image: str) -> None:
         self.file = img
         self.image_id = img_id
 
-        self.file.url = self.MEDIA_PATH + img_name
+        self.file.url = "data:image/jpeg;base64," + base64_image
 
     @property
     def id(self) -> int:
